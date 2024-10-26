@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" type="text/css" href="slide navbar style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+</head>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: 'Jost', sans-serif;
+        background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+    }
+
+    .main {
+        width: 350px;
+        height: 580px;
+        background: red;
+        overflow: hidden;
+        background: url("https://doc-08-2c-docs.googleusercontent.com/docs/securesc/68c90smiglihng9534mvqmq1946dmis5/fo0picsp1nhiucmc0l25s29respgpr4j/1631524275000/03522360960922298374/03522360960922298374/1Sx0jhdpEpnNIydS4rnN4kHSJtU1EyWka?e=view&authuser=0&nonce=gcrocepgbb17m&user=03522360960922298374&hash=tfhgbs86ka6divo3llbvp93mg4csvb38") no-repeat center/ cover;
+        border-radius: 10px;
+        box-shadow: 5px 20px 50px #000;
+    }
+
+    #chk {
+        display: none;
+    }
+
+    .signup {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    label {
+        color: #fff;
+        font-size: 2.3em;
+        justify-content: center;
+        display: flex;
+        margin: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: .5s ease-in-out;
+    }
+
+    input {
+        width: 60%;
+        height: 10px;
+        background: #e0dede;
+        justify-content: center;
+        display: flex;
+        margin: 20px auto;
+        padding: 12px;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+    }
+
+    button {
+        width: 60%;
+        height: 40px;
+        margin: 10px auto;
+        justify-content: center;
+        display: block;
+        color: #fff;
+        background: #573b8a;
+        font-size: 1em;
+        font-weight: bold;
+        margin-top: 30px;
+        outline: none;
+        border: none;
+        border-radius: 5px;
+        transition: .2s ease-in;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #6d44b8;
+    }
+
+    .login {
+        height: 500px;
+        background: #eee;
+        border-radius: 60% / 10%;
+        transform: translateY(-180px);
+        transition: .8s ease-in-out;
+    }
+
+    .login label {
+        color: #573b8a;
+        transform: scale(.6);
+    }
+
+    #chk:checked~.login {
+        transform: translateY(-550px);
+    }
+
+    #chk:checked~.login label {
+        transform: scale(1);
+    }
+
+    #chk:checked~.signup label {
+        transform: scale(.6);
+    }
+
+    /* Styling the select box */
+    select {
+        width: 68%;
+        height: 30px;
+        background: #e0dede;
+        justify-content: center;
+        display: flex;
+        margin: 10px auto;
+        padding: 8px;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        -webkit-appearance: none;
+        /* Remove default arrow in WebKit browsers */
+        -moz-appearance: none;
+        /* Remove default arrow in Firefox */
+        appearance: none;
+        /* Remove default arrow in most modern browsers */
+        text-align: left;
+        /* Align text to the left */
+        padding-left: 10px;
+        /* Add left padding for better alignment */
+        font-size: 0.9em;
+        /* Slightly increase font size for better readability */
+        color: rgba(0, 0, 0, 0.5);
+        /* Low opacity for placeholder text */
+        transition: color 0.3s ease, opacity 0.3s ease;
+        /* Smooth transition */
+    }
+
+    /* Increase opacity when an option other than the placeholder is selected */
+    select:not([value=""]) {
+        color: rgba(0, 0, 0, 1);
+        /* Full opacity after selection */
+    }
+
+    /* Add focus styling for better user experience */
+    select:focus {
+        box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+        color: rgba(0, 0, 0, 1);
+        /* Full opacity on focus */
+    }
+
+    /* Remove the default arrow in Internet Explorer */
+    select::-ms-expand {
+        display: none;
+        /* Remove the default arrow in IE */
+    }
+
+    /* Optional: If you want to add a custom arrow, you can position it with a pseudo-element */
+    select::after {
+        content: '▼';
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+</style>
+
+<body>
+    <div class="main">
+        <input type="checkbox" id="chk" aria-hidden="true">
+
+        <div class="signup">
+            <form>
+                <label for="chk" aria-hidden="true">Sign up</label>
+                <input type="text" name="txt" placeholder="User name" required="">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="pswd1" placeholder="Password" required="">
+                <input type="password" name="pswd2" placeholder="Password" required="">
+                <!--                     <input type="text" name="first_name" placeholder="First Name" required> -->
+                <select name="first_name" required>
+                    <option value="" disabled selected>Select Role</option> <!-- Placeholder option -->
+                    <option value="organizer">organizer</option>
+                    <option value="user">user</option>
+                </select>
+
+                <button>Sign up</button>
+            </form>
+        </div>
+
+        <div class="login">
+            <form>
+                <label for="chk" aria-hidden="true">Login</label>
+                <input type="text" name="text" placeholder="User Name" required="">
+                <input type="password" name="pswd" placeholder="Password" required="">
+                <button>Login</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        // Sign-up (Register)
+        document.querySelector('.signup form').onsubmit = async function (event) {
+            event.preventDefault(); // Prevent form from submitting normally
+            const username = this.txt.value;
+            const password1 = this.pswd1.value;
+            const password2 = this.pswd2.value;
+            const firstName = this.first_name.value;  // Get first name input
+            const email = this.email.value;
+
+            // Ensure passwords match
+            if (password1 !== password2) {
+                swal("Error!", "Passwords do not match", "error");
+                return;
+            }
+
+            // Send the request to the registration endpoint
+            const response = await fetch('/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken'), // Add CSRF token if needed
+                },
+                body: new URLSearchParams({
+                    'txt': username,
+                    'pswd1': password1,
+                    'pswd2': password2,
+                    'first_name': firstName,  // Include first name in the request
+                    'email': email
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                swal("Success!", data.message, "success").then(() => {
+                    // Store JWT tokens in localStorage
+                    localStorage.setItem('access_token', data.tokens.access);
+                    localStorage.setItem('refresh_token', data.tokens.refresh);
+
+                    // Show login form
+                    document.getElementById('chk').checked = true;
+                    this.reset(); // Reset the signup form
+                });
+            } else {
+                swal("Error!", data.error || "Registration failed", "error");
+            }
+        };
+
+        // Login
+        document.querySelector('.login form').onsubmit = async function (event) {
+            event.preventDefault(); // Prevent form from submitting normally
+            const username = this.text.value;
+            const password = this.pswd.value;
+
+            // Send the request to the login endpoint
+            const response = await fetch('/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken'), // Add CSRF token if needed
+                },
+                body: new URLSearchParams({
+                    'text': username,
+                    'pswd': password
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                // Store JWT tokens in localStorage
+                localStorage.setItem('access_token', data.tokens.access);
+                localStorage.setItem('refresh_token', data.tokens.refresh);
+
+                swal("Success!", data.message, "success").then(() => {
+                    // Redirect to another page (after successful login)
+                    window.location.href = '/success/';
+                });
+            } else {
+                swal("Error!", data.error || "Login failed", "error");
+            }
+        };
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Event Summary</title>
+    <style>
+        /* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    max-width: 900px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 40px;
+    font-size: 2.5em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    animation: fadeInDown 1s ease;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+thead {
+    background-color: #4a90e2;
+    color: #ffffff;
+}
+
+thead th {
+    padding: 15px;
+    text-align: left;
+    font-size: 1.2em;
+    letter-spacing: 0.5px;
+    animation: fadeInDown 0.8s ease-in-out;
+}
+
+tbody tr {
+    border-bottom: 1px solid #dddddd;
+    transition: background-color 0.3s ease-in-out;
+}
+
+tbody tr:hover {
+    background-color: #f0f8ff;
+    transform: scale(1.01);
+    transition: transform 0.2s ease-in-out;
+}
+
+td {
+    padding: 12px;
+    color: #333;
+    animation: fadeInUp 1s ease;
+}
+
+td:last-child {
+    text-align: center;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 25px;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+#viewJoinedEvents,
+#goBack {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    margin-top: 20px;
+    text-decoration: none;
+}
+
+#viewJoinedEvents:hover,
+#goBack:hover {
+    background-color: #1c6cd1;
+    transform: scale(1.05);
+}
+
+#goBack {
+    display: block;
+    width: 150px;
+    margin: 20px auto;
+}
+
+#goBack:active {
+    background-color: #4a90e2;
+    transform: scale(0.98);
+}
+
+/* Fade in Animations */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* For Smaller Screens */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+    
+    .container {
+        padding: 15px;
+    }
+
+    td, th {
+        font-size: 0.9em;
+        padding: 10px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Your Events Summary</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Attendees Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.title }}</td>
+                    <td>{{ event.location }}</td>
+                    <td>{{ event.date }}</td>
+                    <td>{{ event.time }}</td>
+                    <td>{{ event.attendees_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Back Button -->
+        <button class="btn btn-primary" onclick="window.history.back();">Back</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1 @@
+web: gunicorn event_organiser.wsgi:apllication --log-file -

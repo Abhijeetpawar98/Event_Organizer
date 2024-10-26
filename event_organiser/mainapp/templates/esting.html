@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            text-align: center;
+        }
+
+        .updateBtn {
+            background-color: #ffc107;
+            color: white;
+        }
+
+        .deleteBtn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .navbar-custom {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .hide {
+            display: none;
+            /* This will hide the element */
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Event Organization</a>
+            <div class="ml-auto">
+                <span id="greeting"></span>, <span id="username"></span>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h5>Data Dashboard</h5>
+
+        <a href="{%url 'mainapp:logout' %}"><button class="">logout</button></a>
+
+        <div class="container mt-4">
+            <!-- Add Data Button -->
+            <button type="button" class="btn btn-primary mb-3 hide" data-toggle="modal" data-target="#dataModal"
+                id="addDataBtn">Create Event</button> <br>
+
+            <button type="button" class="btn btn-info hide" id="viewOrganizerSummary">View Event Summary</button>
+
+            <!-- View Joined Events Button -->
+            <button type="button" class="btn btn-info hide" id="viewJoinedEvents">View Joined Events</button><br>
+
+            <!-- Signup Count Display -->
+            <div id="signupCount" class="mb-3"></div>
+
+            <!-- Filter Inputs -->
+            <div class="filter-container mb-3 d-flex gap-2">
+                <input type="text" id="titleFilter" class="form-control" placeholder="Search by Title">
+                <input type="text" id="locationFilter" class="form-control" placeholder="Search by Location">
+                <input type="date" id="dateFilter" class="form-control" placeholder="Search by Date">
+            </div>
+
+            <!-- Table to display events -->
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Max Attendees</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic content will be injected here -->
+                </tbody>
+            </table>
+
+
+            <!-- Pagination Controls -->
+            <div id="paginationControls" class="d-flex justify-content-center mt-3">
+                <button class="btn btn-primary mx-1" id="prevPageBtn"
+                    onclick="fetchData(currentPage - 1)">Previous</button>
+                <span id="pageNumber" class="mx-3 align-self-center">Page 1</span>
+                <button class="btn btn-primary mx-1" id="nextPageBtn" onclick="fetchData(currentPage + 1)">Next</button>
+            </div>
+
+            <!-- Button to open the modal for adding data -->
+<!--             <button class="btn btn-success mt-3" data-toggle="modal" data-target="#dataModal">Add Event</button> -->
+
+            <!-- Modal for adding data -->
+            <div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="dataModalLabel">Submit Event</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="dataForm">
+                                <input type="text" id="inputTitle" name="title" placeholder="Title" required
+                                    class="form-control mb-2">
+                                <div class="mb-2" style="border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                                    <label for="inputDescription">Description</label>
+                                    <textarea id="inputDescription" name="description" placeholder="Description"
+                                        required class="form-control" rows="4"></textarea>
+                                </div>
+                                <input type="text" id="inputLocation" name="location" placeholder="Location" required
+                                    class="form-control mb-2">
+                                <input type="date" id="inputDate" name="date" required class="form-control mb-2">
+                                <input type="time" id="inputTime" name="time" required class="form-control mb-2">
+                                <input type="number" id="inputMaxAttendees" name="max_attendees"
+                                    placeholder="Max Attendees" required class="form-control mb-2">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-success" id="submitDataBtn">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for updating data -->
+            <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="updateModalLabel">Update Event</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="updateForm">
+                                <input type="hidden" id="updateId" name="id">
+                                <input type="text" id="updateTitle" name="title" required class="form-control mb-2">
+                                <div class="mb-2" style="border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                                    <label for="updateDescription">Description</label>
+                                    <textarea id="updateDescription" name="description" required class="form-control"
+                                        rows="4"></textarea>
+                                </div>
+                                <input type="text" id="updateLocation" name="location" required
+                                    class="form-control mb-2">
+                                <input type="date" id="updateDate" name="date" required class="form-control mb-2">
+                                <input type="time" id="updateTime" name="time" required class="form-control mb-2">
+                                <input type="number" id="updateMaxAttendees" name="max_attendees" required
+                                    class="form-control mb-2">
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-warning" id="updateDataBtn">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            let currentPage = 1; // Track the current page globally
+
+            function fetchData(page = 1, perPage = 5) {
+
+                $.ajax({
+                    url: `/fetch-data/?page=${page}&per_page=${perPage}`,
+                    method: 'GET',
+                    success: function (response) {
+                        $('#dataTable tbody').empty();
+
+                        // Check if response has data array
+                        if (response.data && Array.isArray(response.data)) {
+                            response.data.forEach(entry => {
+                                $('#dataTable tbody').append(`
+                        <tr data-id="${entry.id}">
+                            <td>${entry.title}</td>
+                            <td>${entry.description}</td>
+                            <td>${entry.location}</td>
+                            <td>${entry.date}</td>
+                            <td>${entry.time}</td>
+                            <td>${entry.max_attendees}</td>
+                            <td>
+                                ${isOrganizer
+                                        ? `<button class="btn btn-warning updateBtn">Update</button>
+                                       <button class="btn btn-danger deleteBtn">Delete</button>`
+                                        : `<button type="button" class="btn btn-primary Signup">Signup</button>`
+                                    }
+                            </td>
+                        </tr>
+                        
+                    `);
+                            });
+
+                            // Update the current page
+                            currentPage = response.page;
+                            updatePaginationControls(response.page, response.total_pages);
+
+                        } else {
+                            console.error("Unexpected response format:", response);
+                        }
+                    },
+                    error: function (error) {
+                        console.log("Error fetching data:", error);
+                    }
+                });
+            }
+
+            function updatePaginationControls(page, totalPages) {
+                // Update page number display
+                $('#pageNumber').text(`Page ${page} of ${totalPages}`);
+
+                // Enable or disable pagination buttons based on the current page
+                $('#prevPageBtn').prop('disabled', page <= 1);
+                $('#nextPageBtn').prop('disabled', page >= totalPages);
+            }
+
+            // Initial fetch to load the first page
+            fetchData();
+        </script>
+
+
+        <script>
+            $(document).ready(function () {
+                // Function to filter table rows based on input values
+                function filterTable() {
+                    let titleText = $('#titleFilter').val().toLowerCase();
+                    let locationText = $('#locationFilter').val().toLowerCase();
+                    let dateText = $('#dateFilter').val();
+
+                    $('#dataTable tbody tr').filter(function () {
+                        let titleMatch = $(this).find('td').eq(0).text().toLowerCase().indexOf(titleText) > -1;
+                        let locationMatch = $(this).find('td').eq(2).text().toLowerCase().indexOf(locationText) > -1;
+                        let dateMatch = dateText ? $(this).find('td').eq(3).text() === dateText : true;
+
+                        // Show row if it matches all filter criteria
+                        $(this).toggle(titleMatch && locationMatch && dateMatch);
+                    });
+                }
+
+                // Attach event listeners to filter fields
+                $('#titleFilter').on('keyup', filterTable);
+                $('#locationFilter').on('keyup', filterTable);
+                $('#dateFilter').on('change', filterTable);
+            });
+
+        </script>
+
+        <script>
+
+            // Convert input fields to uppercase
+            function makeUppercase() {
+                const fields = [
+                    'inputTitle',
+                    'inputDescription',
+                    'inputLocation',
+                    'updateTitle',
+                    'updateDescription',
+                    'updateLocation'
+                ];
+
+                fields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    field.addEventListener('input', () => {
+                        field.value = field.value.toUpperCase();
+                    });
+                });
+            }
+
+            // Call the function when the document is ready
+            $(document).ready(function () {
+                makeUppercase();
+            });
+
+
+            // Assuming you have a Django context variable for isOrganizer
+            const isOrganizer = "{{ user.first_name }}" === "organizer"; // Adjust based on your logic to check if the user is an organizer
+
+            $(document).ready(function () {
+                // Check if the user is an organizer
+                let isOrganizer = "{{ user.first_name }}" === "organizer"; // Adjust this condition if needed
+
+                // Show/hide the Add Data button
+                if (isOrganizer) {
+                    $('.btn[data-target="#dataModal"]').removeClass('hide'); // Show button for organizers
+                    $('#viewOrganizerSummary').removeClass('hide');
+                    $('#viewJoinedEvents').addClass('hide');
+                } else {
+                    $('.btn[data-target="#dataModal"]').addClass('hide'); // Hide button for non-organizers
+                    $('#viewOrganizerSummary').addClass('hide');
+                    $('#viewJoinedEvents').removeClass('hide');
+                }
+
+                // Fetch data when the page loads
+                fetchData();
+            });
+
+            // Handle sign up action
+            $('#dataTable').on('click', '.signupBtn', function () {
+                let row = $(this).closest('tr');
+                let id = row.data('id');
+
+                // Confirm sign up action
+                Swal.fire({
+                    title: 'Sign Up',
+                    text: "Do you want to sign up for this event?",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#dc3545',
+                    confirmButtonText: 'Yes, sign up!',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: 'POST',
+                            url: '/signup-event/',
+                            data: {
+                                event_id: id,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            success: function (response) {
+                                Swal.fire(
+                                    'Signed Up!',
+                                    response.success,
+                                    'success'
+                                ).then(() => {
+                                    // Reload the page after the user closes the SweetAlert
+                                    location.reload();
+                                });
+                            },
+                            error: function (error) {
+                                console.log("Error:", error);
+                                Swal.fire(
+                                    'Error!',
+                                    'There was a problem signing you up.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+
+
+            // Reset form fields when the modal is shown
+            $('#dataModal').on('shown.bs.modal', function () {
+                $('#dataForm')[0].reset(); // Reset the form fields
+            });
+
+            // Handle form submission via AJAX in the modal
+            $('#submitDataBtn').click(function (event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you want to submit the form?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#dc3545',
+                    confirmButtonText: 'Yes, submit it!',
+                    cancelButtonText: 'No, cancel!',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If confirmed, gather form data
+                        let formData = {
+                            title: $('#inputTitle').val().toUpperCase(), // Ensure input is uppercase
+                            description: $('#inputDescription').val().toUpperCase(),
+                            location: $('#inputLocation').val().toUpperCase(),
+                            date: $('#inputDate').val(),
+                            time: $('#inputTime').val(),
+                            max_attendees: $('#inputMaxAttendees').val(),
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        };
+                        console.log('Idharrrr agaya')
+                        $.ajax({
+                            type: 'POST',
+                            url: '/submit-data/',
+                            data: formData,
+                            success: function (response) {
+                                console.log('000000')
+                                fetchData();  // Refresh data after submission
+                                $('#dataModal').modal('hide');  // Close the modal after submitting
+                                Swal.fire(
+                                    'Submitted!',
+                                    'Your data has been submitted successfully.',
+                                    'success'
+                                );
+                            },
+                            error: function (error) {
+                                console.log("Error:", error);
+                                Swal.fire(
+                                    'Error!',
+                                    'There was a problem submitting your data.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle update action
+            $('#dataTable').on('click', '.updateBtn', function () {
+                let row = $(this).closest('tr');
+                let id = row.data('id');
+                let title = row.find('td:eq(0)').text();
+                let description = row.find('td:eq(1)').text();
+                let location = row.find('td:eq(2)').text();
+                let date = row.find('td:eq(3)').text();
+                let time = row.find('td:eq(4)').text();
+                let maxAttendees = row.find('td:eq(5)').text();
+
+                // Show SweetAlert confirmation dialog
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you want to update this entry?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#dc3545',
+                    confirmButtonText: 'Yes, update it!',
+                    cancelButtonText: 'No, cancel!',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If confirmed, populate the form fields and show the modal
+                        $('#updateId').val(id);
+                        $('#updateTitle').val(title);
+                        $('#updateDescription').val(description);
+                        $('#updateLocation').val(location);
+                        $('#updateDate').val(date);
+                        $('#updateTime').val(time);
+                        $('#updateMaxAttendees').val(maxAttendees);
+                        $('#updateModal').modal('show');
+                    }
+                });
+            });
+
+            // Handle updating data via AJAX
+            $('#updateDataBtn').click(function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                let formData = {
+                    id: $('#updateId').val(),
+                    title: $('#updateTitle').val().toUpperCase(), // Ensure input is uppercase
+                    description: $('#updateDescription').val().toUpperCase(),
+                    location: $('#updateLocation').val().toUpperCase(),
+                    date: $('#updateDate').val(),
+                    time: $('#updateTime').val(),
+                    max_attendees: $('#updateMaxAttendees').val(),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/update-data/',
+                    data: formData,
+                    success: function (response) {
+                        fetchData();  // Refresh data after update
+                        $('#updateModal').modal('hide');  // Close the modal after updating
+                        Swal.fire(
+                            'Updated!',
+                            'Your data has been updated successfully.',
+                            'success'
+                        );
+                    },
+                    error: function (error) {
+                        console.log("Error:", error);
+                        Swal.fire(
+                            'Error!',
+                            'There was a problem updating your data.',
+                            'error'
+                        );
+                    }
+                });
+            });
+
+            // Handle delete action with SweetAlert
+            $('#dataTable').on('click', '.deleteBtn', function () {
+                let row = $(this).closest('tr');
+                let id = row.data('id');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel!',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: 'POST',
+                            url: '/delete-data/',
+                            data: {
+                                id: id,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            success: function (response) {
+                                fetchData();  // Refresh data after deletion
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Your entry has been deleted.',
+                                    'success'
+                                );
+                            },
+                            error: function (error) {
+                                console.log("Error:", error);
+                                Swal.fire(
+                                    'Error!',
+                                    'There was a problem deleting your entry.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Fetch data when the page loads
+            $(document).ready(function () {
+                fetchData();
+            });
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Fetch the current hour
+                let today = new Date();
+                let hour = today.getHours();
+
+                // Determine the greeting based on time of day
+                let greeting = "";
+                if (hour >= 5 && hour < 12) {
+                    greeting = "Good Morning";
+                } else if (hour >= 12 && hour < 17) {
+                    greeting = "Good Afternoon";
+                } else {
+                    greeting = "Good Evening";
+                }
+
+                // Set the greeting in the navbar
+                document.getElementById('greeting').innerText = greeting;
+
+                // Assuming the username is passed from Django context, you can add the username dynamically
+                // Example: Django template variable (passed via context)
+                let username = "{{ user.username }}";  // Replace with actual dynamic user info
+
+                // Set the username in the navbar
+                document.getElementById('username').innerText = username;
+            });
+
+            // ###################            SIgnup Eveent   #######################################   
+
+            // This function will turn the aignup button to joined button but it has bugs so have and alternative methodS
+            let signedUpEvents = JSON.parse(localStorage.getItem('signedUpEvents')) || [];
+            // $(document).ready(function() {
+            //     // Fetch signed-up events from the server
+            //     fetch('/get-signed-up-events/')
+            //         .then(response => response.json())
+            //         .then(data => {
+            //             // Check if 'signed_up_event_ids' exists and is an array
+            //             if (Array.isArray(data.signed_up_event_ids)) {
+            //                 const signedUpEventIds = data.signed_up_event_ids;
+
+            //                 // Disable buttons and mark as "Joined" for signed-up events
+            //                 signedUpEventIds.forEach(id => {
+            //                     $(`tr[data-id="${id}"] .Signup`).addClass('btn-success').text('Joined').prop('disabled', true);
+            //                 });
+            //             } else {
+            //                 console.error('No signed_up_event_ids found or invalid format.');
+            //             }
+            //         })
+            //         .catch(error => {
+            //             console.error('Error fetching signed-up events:', error);
+            //         });
+            // });
+
+
+            //  This function is use for the purpose that once the user signup it will be remove fromthe list and will be shown in the view joined event
+            $(document).ready(function () {
+                // Fetch signed-up events from the server when the page loads
+                fetch('/get-signed-up-events/')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Check if 'signed_up_event_ids' exists and is an array
+                        if (Array.isArray(data.signed_up_event_ids)) {
+                            const signedUpEventIds = data.signed_up_event_ids;
+
+                            // Loop through the signed-up event IDs and hide the corresponding event rows
+                            signedUpEventIds.forEach(id => {
+                                $(`tr[data-id="${id}"]`).remove(); // Remove the event row from the table
+
+                            });
+                        } else {
+                            console.error('No signed_up_event_ids found or invalid format.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching signed-up events:', error);
+                    });
+            });
+
+
+
+            // Handle Signup button click
+            $('#dataTable').on('click', '.Signup', function () {
+                let row = $(this).closest('tr');
+                let id = row.data('id');
+
+                // Send request to sign up for the event
+                $.ajax({
+                    url: '/sign-up-event/',  // Adjust the URL to your actual signup endpoint
+                    type: 'POST',
+                    data: {
+                        'event_id': id,
+                        'csrfmiddlewaretoken': getCookie('csrftoken')  // Ensure CSRF token is included
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            // Add event ID to localStorage and mark the button as joined
+                            signedUpEvents.push(id);
+                            localStorage.setItem('signedUpEvents', JSON.stringify(signedUpEvents));
+
+                            row.find('.Signup').removeClass('btn-primary')
+                                .addClass('btn-success')
+                                .text('Joined')
+                                .prop('disabled', true);
+
+                            // Show success message
+                            Swal.fire('Success!', 'You have successfully signed up for this event.', 'success');
+                        } else {
+                            Swal.fire('Error!', response.error || 'Failed to sign up.', 'error');
+                        }
+                    }
+                });
+            });
+
+            // Helper function to get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            document.getElementById('viewJoinedEvents').addEventListener('click', function () {
+                // Redirect to the joined events page
+                window.location.href = '/joined-events/';
+            });
+
+            document.getElementById('viewOrganizerSummary').onclick = function () {
+                window.location.href = '/organizer-event-summary/';  // Adjust the URL if needed
+            }
+
+
+        </script>
+
+        <script>
+            // Store the URL for the index view in a JavaScript variable
+            const indexUrl = "{% url 'mainapp:index' %}";  // Ensure this matches your URL pattern name
+
+            // Function to get the CSRF token from cookies
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Fetch protected data
+            function fetchProtectedData() {
+                const accessToken = localStorage.getItem('access_token');
+                if (!accessToken) {
+                    alert('Your session has expired. Please log in again.'); // Notify the user
+                    window.location.href = indexUrl; // Redirect to the index page
+                    return; // Stop further execution
+                }
+
+                fetch('/protected-route/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                console.error('Fetch error:', err);
+                                throw new Error("Failed to fetch protected data");
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const protectedDataElement = document.getElementById('protected-data');
+                        if (protectedDataElement) {
+                            protectedDataElement.innerHTML = JSON.stringify(data, null, 2);
+                        } else {
+                            console.error('Element with ID "protected-data" not found');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (error.message === "Failed to fetch protected data") {
+                            console.error('Token expired, attempting to refresh...');
+
+                            const refreshToken = localStorage.getItem('refresh_token');
+                            if (!refreshToken) {
+                                alert('Your session has expired. Please log in again.');
+                                window.location.href = indexUrl;
+                                return;
+                            }
+
+                            fetch('/refresh-token/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': getCookie('csrftoken'),
+                                },
+                                body: JSON.stringify({ refresh: refreshToken }),
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        return response.json().then(err => {
+                                            console.error('Refresh token error:', err);
+                                            throw new Error("Failed to refresh token");
+                                        });
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    if (data.access) {
+                                        localStorage.setItem('access_token', data.access);
+                                        fetchProtectedData(); // Retry fetching data with the new access token
+                                    } else {
+                                        alert('Failed to refresh token. Please log in again.');
+                                        window.location.href = indexUrl;
+                                    }
+                                })
+                                .catch(error => console.error('Error refreshing token:', error));
+                        }
+                    });
+            }
+
+            // Run fetchProtectedData once the DOM is fully loaded
+            document.addEventListener("DOMContentLoaded", function () {
+                fetchProtectedData();
+
+                // Simulate token expiration after 10 seconds
+                setTimeout(() => {
+                    console.log("Simulating token expiration...");
+                    localStorage.removeItem('access_token'); // Remove access token
+                    fetchProtectedData(); // Attempt to fetch protected data again
+                }, 300000); // 60000 ms = 60 seconds
+            });
+        </script>
+
+        <!-- Bootstrap JS -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
